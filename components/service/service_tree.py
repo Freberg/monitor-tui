@@ -34,7 +34,7 @@ class ServiceTree(TreeControl[ServiceEntry]):
                 if group_name == "":
                     continue
                 matching_children = [child for child in parent_group.children if child.data.name == group_name]
-                if len(matching_children) is 0:
+                if len(matching_children) == 0:
                     next_node = ServiceEntry(group_name, True, None)
                     parent_group.add(group_name, next_node)
                 parent_group = [child for child in parent_group.children if child.data.name == group_name][0]
