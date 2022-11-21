@@ -1,0 +1,9 @@
+title: "Demo Services"
+
+services:
+  - name: "frontend"
+    hierarchy: "production/"
+  - name: "backend"
+    hierarchy: "production/"
+  - name: "db"
+    hierarchy: "production/"

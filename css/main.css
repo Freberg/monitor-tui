@@ -1,0 +1,61 @@
+Screen, ServiceTree, Header, HeaderClock, SensorTable {
+     background: $surface-darken-1;
+}
+
+ServiceTree:focus, SensorTable:focus, DataTable:focus {
+     border: heavy $secondary;
+}
+
+Header, ServiceTree, ServiceContent, DataTable {
+     border: heavy $boost;
+}
+
+Header, ServiceTree {
+    padding-right: 1;
+    /*border: heavy $boost ;*/
+}
+
+ServiceTree, ServiceContent {
+    height: 100%;
+}
+
+ServiceContent {
+    min-width: 100%;
+}
+
+ServiceContentData.-show-content {
+    display: block;
+}
+
+ServiceContentData {
+    display: none;
+}
+
+#tree-view {
+    display: none;
+    scrollbar-gutter: stable;
+    width: auto;
+}
+
+ServiceStatusApp.-show-tree #tree-view {
+    display: block;
+    dock: left;
+    height: 100%;
+    max-width: 50%;
+    min-width: 15%;
+}
+
+SensorTable {
+    height: auto;
+}
+
+DataTable {
+    height: auto;
+    width: auto;
+    max-width: 100%;
+    padding: 0
+}
+
+DataTable > .datatable--cursor, .datatable--highlight {
+    background: $surface;
+}
