@@ -1,3 +1,5 @@
+from typing import Dict, Any
+
 from textual.app import ComposeResult
 from textual.timer import Timer
 from textual.widgets import Static
@@ -11,15 +13,15 @@ class SensorContent(Static):
     sensor_data = None
     update_timer: Timer = None
 
-    def __init__(self, sensor_config: SensorConfig) -> None:
+    def __init__(self, sensor_config: SensorConfig, context: Dict[str, Any]) -> None:
         super().__init__()
         self.sensor_config = sensor_config
-        self.sensor = resolve_sensor(sensor_config)
+        self.sensor = resolve_sensor(sensor_config, context)
         self.poll_wait_seconds = sensor_config.get_poll_wait_seconds()
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the sensor."""
-        yield SensorTable(self.sensor_config.get_name(), self.sensor.get_table_headers(),
+        yield SensorTable(self.sensor_config.get_name(), self.sensor.get_sensor_fields(),
                           self.sensor_config.complete_refresh())
 
     async def on_mount(self) -> None:
@@ -30,8 +32,8 @@ class SensorContent(Static):
     async def update_sensor_data(self):
         """Fetch new sensor data."""
         table = self.query_one(SensorTable)
-        self.sensor_data = await self.sensor.fetch_tabular_data()
-        table.update_rows(self.sensor_data)
+        self.sensor_data = await self.sensor.fetch_sensor_data()
+        table.update_data(self.sensor_data)
 
     def show(self, show: bool) -> None:
         if show:

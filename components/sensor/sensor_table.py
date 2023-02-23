@@ -25,19 +25,10 @@ class SensorTable(Widget):
         table = self.query_one(DataTable)
         table.add_columns(*self.columns)
 
-    def update_rows(self, rows: Iterable[SensorReading]):
-        if self.complete_refresh:
-            self.clear()
+    def update_data(self, rows: Iterable[SensorReading]):
         table = self.query_one(DataTable)
+        if self.complete_refresh:
+            table.clear()
         table.add_rows(map(lambda row: row.get_values(), rows))
         table.add_columns()
         table.refresh()
-
-    def clear(self):
-        table = self.query_one(DataTable)
-        table.row_count = 0
-        table._clear_caches()
-        table._y_offsets.clear()
-        table.data.clear()
-        table.rows.clear()
-        table._line_no = 0

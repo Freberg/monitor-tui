@@ -41,11 +41,11 @@ services:
         name: "node_exporter_memory"
         metrics:
           - name: "total"
-            query: 'node_memory_MemTotal_bytes{{instance="backend"}}'
+            query: 'node_memory_MemTotal_bytes{instance="backend"}'
           - name: "free"
-            query: 'node_memory_MemFree_bytes{{instance="backend"}}'
+            query: 'node_memory_MemFree_bytes{instance="backend"}'
 ```
-To make sensor configuration reusable "additional_label" can be used along with yaml anchors
+To make sensor configuration reusable the query field is templatable, variables can be supplied by specifying 'context'
 ```
 node_exporter_memory: &node_exporter_memory
   type: "prometheus"
@@ -53,21 +53,21 @@ node_exporter_memory: &node_exporter_memory
   name: "node_exporter_memory"
   metrics:
     - name: "total"
-      query: 'node_memory_MemTotal_bytes{{instance="{additional_label}"}}'
+      query: 'node_memory_MemTotal_bytes{instance="$label"}'
     - name: "free"
-      query: 'node_memory_MemFree_bytes{{instance="{additional_label}"}}'
+      query: 'node_memory_MemFree_bytes{instance="$ilabel"}'
       
 services:
   - name: "backend"
     hierarchy: "production/"
     sensors:
       - <<: *node_exporter_memory
-        additional_label: "backend"
+        context: { label: backend }
   - name: "frontend"
     hierarchy: "production/"
     sensors:
       - <<: *node_exporter_memory
-        additional_label: "frontend"
+        context: { label: backend }
 ```
 
 
@@ -91,7 +91,7 @@ services:
                ] } }
     result_fields: [ "@timestamp", "message" ]
 ```
-To make sensor configuration reusable "sub_query" can be used along with yaml anchors
+To make sensor configuration reusable the query field is templatable, variables can be supplied by specifying 'context'
 ```
 elastic_tail: &elastic_tail
   type: "elastic"
@@ -101,7 +101,8 @@ elastic_tail: &elastic_tail
   index_pattern: "<INDEX_PATTERN>"
   sort: {"@timestamp": "desc"}
   query: { "bool": { "filter": [
-         { "match": { "tags": "production" } }
+         { "match": { "tags": "production" } },
+         { "match": { "tags": "$service" } }
          ] } }
   result_fields: [ "@timestamp", "message" ]
          
@@ -110,10 +111,10 @@ services:
     hierarchy: "production/"
     sensors:
       - <<: *elastic_tail
-        sub_query: { "bool": { "filter": [ { "match": { "tags": "backend" } } ] } }
+        context: { service: backend }
   - name: "frontend"
     hierarchy: "production/"
     sensors:
       - <<: *elastic_tail
-        sub_query: { "bool": { "filter": [ { "match": { "tags": "frontend" } } ] } }
+        context: { service: backend }
 ```

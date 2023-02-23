@@ -1,52 +1,52 @@
+import asyncio
 from functools import reduce
-from typing import Any, Dict, Union, Iterable
+from typing import Any, Dict, Iterable
 
 import elasticsearch.exceptions
 from elasticsearch import AsyncElasticsearch
 
+import config.config
 from sensors.sensor import Sensor, SensorReading, EMPTY_SENSOR_READING
 
-elastic_clients: dict[str, AsyncElasticsearch] = {}
+clients: dict[str, AsyncElasticsearch] = {}
 
 
 class ElasticSensor(Sensor):
 
-    def __init__(self, sensor_configuration: Union[str, Dict[str, Any]]):
+    def __init__(self, sensor_configuration: Dict[str, Any], context: Dict[str, Any]):
         super(ElasticSensor, self).__init__()
-        if sensor_configuration["url"] not in elastic_clients:
-            elastic_clients[sensor_configuration["url"]] = AsyncElasticsearch(sensor_configuration["url"])
-        self.client = elastic_clients[sensor_configuration["url"]]
-        self.url = sensor_configuration["url"]
-        self.index_pattern = sensor_configuration["index_pattern"]
-        self.sort = sensor_configuration.get("sort", None)
-        self.query = sensor_configuration["query"]
-        self.aggregation = sensor_configuration.get("aggregation", None)
-        self.max_hits = sensor_configuration["max_hits"]
-        self.aggregation_field = sensor_configuration.get("aggregation_field", None)
+        if sensor_configuration["url"] not in clients:
+            clients[sensor_configuration["url"]] = AsyncElasticsearch(sensor_configuration["url"])
+        self.client = clients[sensor_configuration["url"]]
+        self.context = context
         self.result_fields = sensor_configuration["result_fields"]
-        self.sub_query = sensor_configuration["sub_query"]
 
-    async def search(self):
-        args = {
-            "index": self.index_pattern,
-            "size": self.max_hits
+        self.query = self.format_json(sensor_configuration["query"], self.context)
+        self.sub_query = self.format_json(sensor_configuration.get("sub_query", None), self.context)
+        self.aggregation = self.format_json(sensor_configuration.get("aggregation", None), self.context)
+        self.sort = self.format_json(sensor_configuration.get("sort", None), self.context)
+
+        self.args = {
+            "index": self.format_json(sensor_configuration["index_pattern"], self.context),
+            "size": self.format_json(sensor_configuration["max_hits"], self.context)
         }
 
         if self.sub_query is not None:
-            args["query"] = {"bool": {"must": [self.query, self.sub_query]}}
+            self.args["query"] = {"bool": {"must": [self.query, self.sub_query]}}
         else:
-            args["query"] = {"bool": {"must": [self.query]}}
+            self.args["query"] = {"bool": {"must": [self.query]}}
         if self.sort is not None:
-            args["sort"] = self.sort
+            self.args["sort"] = sensor_configuration["sort"]
         if self.aggregation is not None:
-            args["aggs"] = {"groups": self.aggregation if self.aggregation is not None else ""}
+            self.args["aggs"] = {"groups": self.aggregation}
 
-        return await self.client.search(**args)
+    async def search(self):
+        return await self.client.search(**self.args)
 
-    def get_table_headers(self) -> Iterable[str]:
+    def get_sensor_fields(self) -> Iterable[str]:
         return self.result_fields
 
-    async def fetch_tabular_data(self) -> Iterable[SensorReading]:
+    async def fetch_sensor_data(self) -> Iterable[SensorReading]:
         try:
             results = await self.search()
         except elasticsearch.ElasticsearchException as elastic_exception:
@@ -67,3 +67,11 @@ class ElasticSensor(Sensor):
     def strip_message(self, message: Dict[str, Any]) -> Iterable[str]:
         return map(lambda result_field: str(message.get(result_field, "N/A")), self.result_fields)
 
+
+if __name__ == '__main__':
+    service_config = config.config.read_config().get_services()[3]
+    sensor_config = service_config.get_sensors()[2]
+    context = sensor_config.yaml_config.get("context", {}) | service_config.get_context()
+    sensor = ElasticSensor(sensor_config.yaml_config, context)
+    tabular_data = asyncio.get_event_loop().run_until_complete(sensor.fetch_sensor_data())
+    print([list(r.values) for r in tabular_data])

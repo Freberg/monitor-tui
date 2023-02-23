@@ -1,15 +1,14 @@
 from typing import Type, Optional
 
-from textual import events
 from textual.app import App, ComposeResult, CSSPathType
 from textual.containers import Container, Vertical
 from textual.driver import Driver
 from textual.reactive import var
-from textual.widgets import Header, Static, Footer
+from textual.widgets import Header, Footer, Label
 
 from components.service.service_content import ServiceContent
 from components.service.service_tree import ServiceTree
-from config.config import read_config, ServiceConfig, SensorConfig
+from config.config import read_config
 
 
 class ServiceStatusApp(App):
@@ -24,7 +23,9 @@ class ServiceStatusApp(App):
 
     show_tree = var(True)
 
-    def __init__(self, driver_class: Optional[Type[Driver]] = None, css_path: CSSPathType = None,
+    def __init__(self,
+                 driver_class: Type[Driver] | None = None,
+                 css_path: CSSPathType | None = None,
                  watch_css: bool = False):
         super().__init__(driver_class, css_path, watch_css)
         self.config = read_config()
@@ -43,14 +44,16 @@ class ServiceStatusApp(App):
         )
         yield Footer()
 
-    def on_mount(self, event: events.Mount) -> None:
+    def on_mount(self) -> None:
         self.query_one(ServiceTree).focus()
+        self.query_one(Header).tall = True
 
     def on_service_tree_selected(self, message: ServiceTree.Selected) -> None:
         """Called when a non group is selected in the service tree."""
+        message.stop()
+        self.sub_title = message.service.name
         service_info = self.query_one(ServiceContent)
         service_info.update_selected_service(message.service.service_config)
-        self.sub_title = message.service.name
 
     def action_toggle_dark(self) -> None:
         """Called in response to key binding to toggle dark mode."""

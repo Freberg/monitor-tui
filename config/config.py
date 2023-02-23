@@ -1,10 +1,11 @@
-from typing import Any, List
+import os
+from typing import Any, List, Dict
 
 import yaml
 
 
 class SensorConfig:
-    def __init__(self, yaml_config: dict[str, Any]) -> None:
+    def __init__(self, yaml_config: Dict[str, Any]) -> None:
         super().__init__()
         self.yaml_config = yaml_config
 
@@ -22,7 +23,7 @@ class SensorConfig:
 
 
 class ServiceConfig:
-    def __init__(self, yaml_config: dict[str, Any]) -> None:
+    def __init__(self, yaml_config: Dict[str, Any]) -> None:
         super().__init__()
         self.yaml_config = yaml_config
 
@@ -35,9 +36,12 @@ class ServiceConfig:
     def get_hierarchy(self) -> List[str]:
         return self.yaml_config.get("hierarchy", "").split("/")
 
+    def get_context(self) -> Dict[str, Any]:
+        return self.yaml_config.get("context", {})
+
 
 class Config:
-    def __init__(self, yaml_config: dict[str, Any]) -> None:
+    def __init__(self, yaml_config: Dict[str, Any]) -> None:
         super().__init__()
         self.yaml_config = yaml_config
 
@@ -48,7 +52,7 @@ class Config:
         return self.yaml_config.get("title", "Service Monitoring App")
 
 
-def read_config(path: str = "config.yml") -> Config:
+def read_config(path: str = os.getenv("CONFIG_FILE_PATH", default="config.yaml")) -> Config:
     with open(path) as file:
         yaml_config = yaml.load(file, Loader=yaml.FullLoader)
     return Config(yaml_config)

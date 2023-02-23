@@ -1,11 +1,12 @@
 from dataclasses import dataclass
-from functools import lru_cache
 from typing import List, Optional
 
-from rich.console import RenderableType
+from rich.style import Style
 from rich.text import Text
 from textual.message import Message, MessageTarget
-from textual.widgets._tree_control import TreeControl, TreeNode
+from textual.widgets._tree import Tree
+from textual.widgets.tree import TreeNode
+
 from config.config import ServiceConfig
 
 
@@ -16,7 +17,7 @@ class ServiceEntry:
     service_config: Optional[ServiceConfig]
 
 
-class ServiceTree(TreeControl[ServiceEntry]):
+class ServiceTree(Tree[ServiceEntry]):
     class Selected(Message):
         def __init__(self, sender: MessageTarget, service: ServiceEntry) -> None:
             super().__init__(sender)
@@ -40,56 +41,35 @@ class ServiceTree(TreeControl[ServiceEntry]):
                 parent_group = [child for child in parent_group.children if child.data.name == group_name][0]
             parent_group.add(service.get_name(), ServiceEntry(service.get_name(), False, service))
 
-        self.root.expand(True)
+        self.root.expand()
         self.refresh(layout=True)
 
-    async def on_tree_control_node_selected(self, message: TreeControl.NodeSelected[ServiceEntry]) -> None:
-        entry = message.node.data
+    def on_tree_node_expanded(self, event: Tree.NodeSelected) -> None:
+        event.stop()
+        entry = event.node.data
+        if entry is None:
+            return
+        if entry.is_group:
+            return
+        else:
+            self.post_message_no_wait(self.Selected(self, entry))
+
+    def on_tree_node_selected(self, event: Tree.NodeSelected) -> None:
+        event.stop()
+        entry = event.node.data
         if not entry.is_group:
-            await self.emit(self.Selected(self, entry))
+            self.post_message_no_wait(self.Selected(self, entry))
         else:
-            message.node.toggle()
+            return
 
-    def render_node(self, node: TreeNode[ServiceEntry]) -> RenderableType:
-        return self.render_tree_label(
-            node,
-            node.data.is_group,
-            node.expanded,
-            node.is_cursor,
-            node.id == self.hover_node,
-            self.has_focus,
-        )
+    def render_label(self, node: TreeNode[ServiceEntry], base_style: Style, style: Style):
+        node_label = node._label.copy()
+        node_label.stylize(style)
 
-    @lru_cache(maxsize=1024 * 32)
-    def render_tree_label(self, node: TreeNode[ServiceEntry],
-                          is_group: bool,
-                          expanded: bool,
-                          is_cursor: bool,
-                          is_hover: bool,
-                          has_focus: bool,
-                          ) -> RenderableType:
-        meta = {
-            "@click": f"click_label({node.id})",
-            "tree_node": node.id,
-            "cursor": node.is_cursor,
-        }
-        label = Text(node.label) if isinstance(node.label, str) else node.label
-        if is_hover:
-            label.stylize("underline")
-        if is_group:
-            label.stylize("bold")
-            icon = "-" if expanded else "+"
+        if node._allow_expand and node.data.is_group:
+            prefix = ("- " if node.is_expanded else "+ ", base_style)
         else:
-            icon = ""
-            label.highlight_regex(r"\..*$", "italic")
+            prefix = ""
 
-        if label.plain.startswith("."):
-            label.stylize("dim")
-
-        if is_cursor and has_focus:
-            cursor_style = self.get_component_styles("tree--cursor").rich_style
-            label.stylize(cursor_style)
-
-        icon_label = Text(f"{icon} ", no_wrap=True, overflow="ellipsis") + label
-        icon_label.apply_meta(meta)
-        return icon_label
+        text = Text.assemble(prefix, node_label)
+        return text

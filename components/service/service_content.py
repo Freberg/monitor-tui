@@ -51,7 +51,8 @@ class ServiceContentData(Static):
         if self.service_config is None:
             sensor_content = []
         else:
-            sensor_content = [SensorContent(sensor_config) for sensor_config in self.service_config.get_sensors()]
+            sensor_content = [SensorContent(sensor_config, self.service_config.get_context())
+                              for sensor_config in self.service_config.get_sensors()]
 
         yield Container(
             Vertical(*sensor_content)
