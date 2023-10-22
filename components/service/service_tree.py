@@ -3,8 +3,8 @@ from typing import List, Optional
 
 from rich.style import Style
 from rich.text import Text
-from textual.message import Message, MessageTarget
-from textual.widgets._tree import Tree
+from textual.message import Message
+from textual.widgets import Tree
 from textual.widgets.tree import TreeNode
 
 from config.config import ServiceConfig
@@ -19,8 +19,8 @@ class ServiceEntry:
 
 class ServiceTree(Tree[ServiceEntry]):
     class Selected(Message):
-        def __init__(self, sender: MessageTarget, service: ServiceEntry) -> None:
-            super().__init__(sender)
+        def __init__(self, service: ServiceEntry) -> None:
+            super().__init__()
             self.service = service
 
     def __init__(self, service_configs: List[ServiceConfig]) -> None:
@@ -52,21 +52,21 @@ class ServiceTree(Tree[ServiceEntry]):
         if entry.is_group:
             return
         else:
-            self.post_message_no_wait(self.Selected(self, entry))
+            self.post_message(self.Selected(entry))
 
     def on_tree_node_selected(self, event: Tree.NodeSelected) -> None:
         event.stop()
         entry = event.node.data
         if not entry.is_group:
-            self.post_message_no_wait(self.Selected(self, entry))
+            self.post_message(self.Selected(entry))
         else:
             return
 
     def render_label(self, node: TreeNode[ServiceEntry], base_style: Style, style: Style):
-        node_label = node._label.copy()
+        node_label = node.label.copy()
         node_label.stylize(style)
 
-        if node._allow_expand and node.data.is_group:
+        if node.allow_expand and node.data.is_group:
             prefix = ("- " if node.is_expanded else "+ ", base_style)
         else:
             prefix = ""

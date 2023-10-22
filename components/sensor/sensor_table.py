@@ -1,10 +1,9 @@
 from typing import Iterable
 
 from rich.console import RenderableType
-from rich.text import Text
 from textual.app import ComposeResult
 from textual.widget import Widget
-from textual.widgets import Static, DataTable
+from textual.widgets import DataTable
 
 from sensors.sensor import SensorReading
 
@@ -18,8 +17,7 @@ class SensorTable(Widget):
         self.complete_refresh = complete_refresh
 
     def compose(self) -> ComposeResult:
-        yield Static(renderable=Text(self.table_name))
-        yield DataTable(name=self.table_name)
+        yield DataTable(name=self.table_name, cursor_type="row")
 
     def on_mount(self) -> None:
         table = self.query_one(DataTable)
@@ -30,5 +28,8 @@ class SensorTable(Widget):
         if self.complete_refresh:
             table.clear()
         table.add_rows(map(lambda row: row.get_values(), rows))
-        table.add_columns()
-        table.refresh()
+
+        table.add_rows([[]])
+        self.set_styles(f"height: {len(table.rows) + 3};")
+        self.refresh()
+

@@ -1,5 +1,6 @@
 from typing import Dict, Any
 
+from rich.text import Text
 from textual.app import ComposeResult
 from textual.timer import Timer
 from textual.widgets import Static
@@ -21,6 +22,7 @@ class SensorContent(Static):
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the sensor."""
+        yield Static(renderable=Text(self.sensor_config.get_name()))
         yield SensorTable(self.sensor_config.get_name(), self.sensor.get_sensor_fields(),
                           self.sensor_config.complete_refresh())
 
