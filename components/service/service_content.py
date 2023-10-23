@@ -1,8 +1,7 @@
-from collections.abc import Container
 from typing import Optional
 
 from textual.app import ComposeResult
-from textual.containers import Container, VerticalScroll
+from textual.containers import VerticalScroll
 from textual.reactive import reactive
 from textual.widgets import Static
 
@@ -54,9 +53,7 @@ class ServiceContentData(Static):
             sensor_content = [SensorContent(sensor_config, self.service_config.get_context())
                               for sensor_config in self.service_config.get_sensors()]
 
-        yield Container(
-            VerticalScroll(*sensor_content)
-        )
+        yield VerticalScroll(*sensor_content)
 
     def show(self, show: bool) -> None:
         self.set_class(show, "-show-content")

@@ -69,9 +69,14 @@ class ElasticSensor(Sensor):
 
 
 if __name__ == '__main__':
-    service_config = config.config.read_config().get_services()[3]
-    sensor_config = service_config.get_sensors()[2]
+    service_config = config.config.read_config().get_services()[5]
+    sensor_config = service_config.get_sensors()[0]
     context = sensor_config.yaml_config.get("context", {}) | service_config.get_context()
     sensor = ElasticSensor(sensor_config.yaml_config, context)
-    tabular_data = asyncio.get_event_loop().run_until_complete(sensor.fetch_sensor_data())
-    print([list(r.values) for r in tabular_data])
+    readings = asyncio.get_event_loop().run_until_complete(sensor.fetch_sensor_data())
+    data = [list(reading.values) for reading in readings]
+    sequence = [float(x[0]) for x in data]
+    print(len(data))
+    print(data)
+    print(len(sequence))
+    print(sequence)

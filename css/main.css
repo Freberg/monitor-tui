@@ -1,12 +1,12 @@
-Screen, ServiceTree, Header, HeaderClock, SensorTable {
+Screen, ServiceTree, Header, HeaderClock {
      background: $surface-darken-1;
 }
 
-ServiceTree:focus, SensorTable:focus, DataTable:focus {
+ServiceTree:focus, SensorContent:focus {
      border: heavy $secondary;
 }
 
-Header, ServiceTree, ServiceContent, DataTable {
+Header, ServiceTree, SensorContent {
      border: heavy $boost;
 }
 
@@ -43,13 +43,32 @@ ServiceContentData {
     display: none;
 }
 
+SensorContent > Static {
+    padding-bottom: 1;
+}
+
+SensorSparkline {
+    height: 2;
+    background: $surface;
+    content-align-vertical: middle;
+}
+
+SensorSparkline > * > * {
+    width: auto;
+    padding-left: 3;
+}
+
 DataTable {
     width: 100%;
     height: 100%;
-    padding: 0;
     overflow-y: hidden;
 }
 
 DataTable > .datatable--cursor, .datatable--highlight {
     background: $surface;
+}
+
+Sparkline {
+    width: 100%;
+    height: 100%;
 }

@@ -5,8 +5,10 @@ from textual.app import ComposeResult
 from textual.timer import Timer
 from textual.widgets import Static
 
+from components.sensor.sensor_sparkline import SensorSparkline
 from components.sensor.sensor_table import SensorTable
-from config.config import SensorConfig
+from components.sensor.sensor_widget import SensorWidget
+from config.config import SensorConfig, ComponentType
 from sensors.sensor_resolver import resolve_sensor
 
 
@@ -23,8 +25,13 @@ class SensorContent(Static):
     def compose(self) -> ComposeResult:
         """Create child widgets for the sensor."""
         yield Static(renderable=Text(self.sensor_config.get_name()))
-        yield SensorTable(self.sensor_config.get_name(), self.sensor.get_sensor_fields(),
-                          self.sensor_config.complete_refresh())
+
+        match self.sensor_config.get_component_type():
+            case ComponentType.TABLE:
+                yield SensorTable(self.sensor_config.get_name(), self.sensor.get_sensor_fields(),
+                                  self.sensor_config.complete_refresh())
+            case ComponentType.SPARKLINE:
+                yield SensorSparkline(self.sensor.get_sensor_fields())
 
     async def on_mount(self) -> None:
         """Event handler called when sensor widget is added to the app."""
@@ -33,9 +40,9 @@ class SensorContent(Static):
 
     async def update_sensor_data(self):
         """Fetch new sensor data."""
-        table = self.query_one(SensorTable)
+        sensor_widget = self.query_one(SensorWidget)
         self.sensor_data = await self.sensor.fetch_sensor_data()
-        table.update_data(self.sensor_data)
+        sensor_widget.update_data(self.sensor_data)
 
     def show(self, show: bool) -> None:
         if show:

@@ -1,7 +1,18 @@
 import os
+from enum import Enum
 from typing import Any, List, Dict
 
 import yaml
+
+
+class SensorType(Enum):
+    ELASTIC = 1
+    PROMETHEUS = 2
+
+
+class ComponentType(Enum):
+    TABLE = 1
+    SPARKLINE = 2
 
 
 class SensorConfig:
@@ -12,8 +23,11 @@ class SensorConfig:
     def get_name(self):
         return self.yaml_config["name"]
 
-    def get_sensor_type(self):
-        return self.yaml_config["type"]
+    def get_sensor_type(self) -> SensorType:
+        return SensorType[str(self.yaml_config["sensor_type"]).upper()]
+
+    def get_component_type(self) -> ComponentType:
+        return ComponentType[self.yaml_config.get("component_type", "table").upper()]
 
     def complete_refresh(self) -> bool:
         return self.yaml_config.get("complete_refresh", True)
