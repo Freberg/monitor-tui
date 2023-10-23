@@ -1,4 +1,5 @@
 ![GitHub release (with filter)](https://img.shields.io/github/v/release/freberg/monitor-tui)
+[![CI workflow](https://img.shields.io/github/actions/workflow/status/freberg/monitor-tui/ci.yml?branch=main&label=ci&logo=github&style=flat-square)](https://github.com/freberg/monitor-tui/actions?workflow=ci)
 
 # monitor-tui
 
