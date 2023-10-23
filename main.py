@@ -1,10 +1,10 @@
-from typing import Type, Optional
+from typing import Type
 
 from textual.app import App, ComposeResult, CSSPathType
 from textual.containers import Container, Vertical
 from textual.driver import Driver
 from textual.reactive import var
-from textual.widgets import Header, Footer, Label
+from textual.widgets import Header, Footer
 
 from components.service.service_content import ServiceContent
 from components.service.service_tree import ServiceTree
