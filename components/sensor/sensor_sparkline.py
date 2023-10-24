@@ -4,7 +4,6 @@ from typing import Iterable
 from rich.console import RenderableType
 from textual.app import ComposeResult
 from textual.containers import Horizontal
-from textual.reactive import reactive
 from textual.widgets import Sparkline, Static
 
 from components.sensor.sensor_widget import SensorWidget
@@ -23,7 +22,7 @@ class SensorSparkline(SensorWidget):
     def __init__(self, columns: Iterable[RenderableType]):
         super(SensorSparkline, self).__init__()
         self.columns = list(columns)
-        self.latest_readings = [reactive(None)] * len(self.columns)
+        self.latest_readings = [None] * len(self.columns)
 
     def compose(self) -> ComposeResult:
         yield Static()
@@ -43,12 +42,15 @@ class SensorSparkline(SensorWidget):
 
     def update_data(self, readings: Iterable[SensorReading]):
         data = [list(reading.values) for reading in readings]
-        self.latest_readings = data[-1]
 
-        sparklines = self.query(Sparkline)
-        for i, sparkline in enumerate(sparklines):
-            sparkline.set_loading(False)
-            sparkline.data = [float(x[i]) for x in data]
+        if len(data[0]) == len(self.columns):
+            self.latest_readings = data[-1]
+            sparklines = self.query(Sparkline)
+            for i, sparkline in enumerate(sparklines):
+                sparkline.set_loading(False)
+                sparkline.data = [float(x[i]) for x in data]
+        else:
+            self.latest_readings = [data[0][0]] * len(self.columns)
 
         statics = self.query(selector=".latest_reading")
         for i, static in enumerate(statics):
