@@ -40,6 +40,8 @@ class ElasticSensor(Sensor):
         if self.aggregation is not None:
             self.args["aggs"] = {"groups": self.aggregation}
 
+        self.reverse_results = sensor_configuration.get("reverse_results", False)
+
     async def search(self):
         return await self.client.search(**self.args)
 
@@ -62,7 +64,13 @@ class ElasticSensor(Sensor):
         else:
             results = map(lambda result: result["_source"], results.get("hits", {}).get("hits", []))
 
-        return map(lambda result: SensorReading(self.strip_message(result), result), results)
+        results = map(lambda result: SensorReading(self.strip_message(result), result), results)
+
+        if self.reverse_results:
+            results = list(results)
+            results.reverse()
+
+        return results
 
     def strip_message(self, message: Dict[str, Any]) -> Iterable[str]:
         return map(lambda result_field: str(message.get(result_field, "N/A")), self.result_fields)
