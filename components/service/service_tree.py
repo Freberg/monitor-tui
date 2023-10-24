@@ -29,8 +29,10 @@ class ServiceTree(Tree[ServiceEntry]):
         self.service_configs = service_configs
 
     def on_mount(self) -> None:
+        max_len = 0
         for service in self.service_configs:
             parent_group = self.root
+            max_len = max(max_len, len(" ".join(service.get_hierarchy())))
             for group_name in service.get_hierarchy():
                 if group_name == "":
                     continue
@@ -41,6 +43,7 @@ class ServiceTree(Tree[ServiceEntry]):
                 parent_group = [child for child in parent_group.children if child.data.name == group_name][0]
             parent_group.add(service.get_name(), ServiceEntry(service.get_name(), False, service))
 
+        self.set_styles(f"width: {max_len + 15};")
         self.root.expand()
         self.refresh(layout=True)
 
