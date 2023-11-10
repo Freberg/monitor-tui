@@ -36,8 +36,7 @@ class SensorSparkline(SensorWidget):
     def on_mount(self) -> None:
         sparklines = self.query(Sparkline)
         for sparkline in sparklines:
-            # TODO enable once this is fixed https://github.com/Textualize/textual/issues/2912
-            sparkline.set_loading(False)
+            sparkline.set_loading(True)
         self.set_styles(f"height: {len(self.columns) * 2 + 1}; align-vertical: middle;")
 
     def update_data(self, readings: Iterable[SensorReading]):

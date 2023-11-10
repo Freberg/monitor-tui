@@ -21,8 +21,7 @@ class SensorTable(SensorWidget):
 
     def on_mount(self) -> None:
         table = self.query_one(DataTable)
-        # TODO enable once this is fixed https://github.com/Textualize/textual/issues/2912
-        table.set_loading(False)
+        table.set_loading(True)
         table.add_columns(*self.columns)
 
     def update_data(self, rows: Iterable[SensorReading]):

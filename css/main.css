@@ -49,7 +49,6 @@ SensorContent > Static {
 
 SensorSparkline {
     height: 2;
-    background: $surface;
     content-align-vertical: middle;
 }
 
@@ -64,11 +63,11 @@ DataTable {
     overflow-y: hidden;
 }
 
-DataTable > .datatable--cursor, .datatable--highlight {
-    background: $surface;
-}
-
 Sparkline {
     width: 100%;
     height: 100%;
+}
+
+LoadingIndicator, SensorSparkline, DataTable > .datatable--cursor, .datatable--highlight {
+    background: $surface;
 }
