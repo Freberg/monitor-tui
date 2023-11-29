@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "elasticsearch*"
+      - dependency-name: "@elasticsearch*"
         update-types: [ "version-update:semver-major" ]
   - package-ecosystem: "docker"
     directory: "/"
