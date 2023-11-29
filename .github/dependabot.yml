@@ -4,7 +4,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    exclude-patterns:
+      - "elasticsearch*"
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
+
