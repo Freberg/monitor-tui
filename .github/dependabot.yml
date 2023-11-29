@@ -4,8 +4,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    exclude-patterns:
-      - "elasticsearch*"
+    ignore:
+      - dependency-name: "elasticsearch*"
+        update-types: [ "version-update:semver-major" ]
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
