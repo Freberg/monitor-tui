@@ -1,4 +1,4 @@
-textual[dev]~=0.43
+textual[dev]~=0.45
 rich~=13.7
 
 pyyaml~=6.0
