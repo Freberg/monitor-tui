@@ -3,7 +3,7 @@ rich~=13.7
 
 pyyaml~=6.0
 
-elasticsearch[async]~=7.17
+elasticsearch[async]~=8.12
 elasticsearch-dsl~=7.4
 
 prometheus_api_client~=0.5
