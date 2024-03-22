@@ -23,7 +23,7 @@ class ServiceContent(Static):
     def update_selected_service(self, service: ServiceConfig):
         """Update the service which to display sensor data for by replacing the content using a different config."""
         self.selected_service_config = service
-        content_id = f"service-content-data-{service.get_name()}"
+        content_id = f"service-content-data-{service.get_name().replace(' ', '_')}"
         should_create_new_content = True
 
         for content_data in self.query(ServiceContentData):
