@@ -1,0 +1,12 @@
+services:
+  monitor-tui:
+    build: .
+    stdin_open: true
+    tty: true
+    environment:
+      CONFIG_FILE_PATH: '/app/config.yml'
+      TERM: 'xterm-256color'
+      OPEN_SEARCH_USER: ${OPEN_SEARCH_USER}
+      OPEN_SEARCH_PASS: ${OPEN_SEARCH_PASS}
+    volumes:
+      - '${MONITOR_TUI_CONFIG_FILE_PATH:-./config.yml}:/app/config.yml'

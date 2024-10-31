@@ -1,10 +1,12 @@
-textual[dev]~=0.52
+textual~=0.52
 rich~=13.7
 
 pyyaml~=6.0
 
 elasticsearch[async]~=7.17
 elasticsearch-dsl~=7.4
+
+opensearch-py[async]==2.7.1
 
 prometheus_api_client~=0.5
 requests~=2.31

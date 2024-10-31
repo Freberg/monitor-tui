@@ -8,6 +8,7 @@ import yaml
 class SensorType(Enum):
     ELASTIC = 1
     PROMETHEUS = 2
+    OPEN_SEARCH = 3
 
 
 class ComponentType(Enum):
