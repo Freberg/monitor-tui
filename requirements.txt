@@ -9,4 +9,4 @@ elasticsearch-dsl~=7.4
 opensearch-py[async]==2.7.1
 
 prometheus_api_client~=0.5
-requests~=2.31
+requests~=2.32
